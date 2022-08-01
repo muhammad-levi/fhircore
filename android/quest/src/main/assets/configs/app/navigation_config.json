@@ -94,6 +94,23 @@
       ]
     },
     {
+      "id": "child_register",
+      "display": "Child",
+      "icon": "",
+      "showCount": true,
+      "actions": [
+        {
+          "trigger": "ON_CLICK",
+          "workflow": "LAUNCH_REGISTER",
+          "id": "child_register"
+        },
+        {
+          "trigger": "ON_COUNT",
+          "id": "child_register"
+        }
+      ]
+    },
+    {
       "id": "task_register",
       "display": "Tasks",
       "icon": "",
