@@ -9,7 +9,7 @@
   },
   "searchBar": {
     "visible": true,
-    "display": "Search task by name",
+    "display": "Search by Task Name or ID",
     "computedRules": [
       "taskName"
     ]
@@ -55,6 +55,11 @@
               {
                 "viewType": "COMPOUND_TEXT",
                 "primaryText": "@{taskName}",
+                "primaryTextColor": "#000000"
+              },
+              {
+                "viewType": "COMPOUND_TEXT",
+                "primaryText": "ID: @{taskId}",
                 "primaryTextColor": "#000000"
               },
               {

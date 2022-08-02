@@ -4,13 +4,23 @@
   "id": "child_register",
   "fhirResource": {
     "baseResource": {
-      "resource": "Patient",
+      "resource": "Condition",
       "dataQueries": [
         {
-          "id": "childQueryByDateOfBirt",
+          "id": "ancQueryByCode",
           "filterType": "TOKEN",
-          "key": "date-of-birth",
-          "valueType": "DATE",
+          "key": "code",
+          "valueType": "CODEABLECONCEPT",
+          "valueCoding": {
+            "system": "http://snomed.info/sct",
+            "code": "77386006"
+          }
+        },
+        {
+          "id": "ancQueryByClinicalStatus",
+          "filterType": "TOKEN",
+          "key": "clinical-status",
+          "valueType": "CODEABLECONCEPT",
           "valueCoding": {
             "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
             "code": "active"
@@ -21,7 +31,7 @@
     "relatedResources": [
       {
         "resource": "Patient",
-        "fhirPathExpression": "Condition.subject",=
+        "fhirPathExpression": "Condition.subject",
         "relatedResources": [
           {
             "resource": "CarePlan",
@@ -33,7 +43,7 @@
   },
   "searchBar": {
     "visible": true,
-    "display": "Search by name",
+    "display": "Search by Child Name or ID",
     "computedRules": [
       "patientName"
     ]
@@ -51,7 +61,7 @@
         "name": "patientId",
         "condition": "true",
         "actions": [
-          "data.put('patientId', fhirPath.extractValue(Patient.get(0), \"Patient.identifier[0].value\"))"
+          "data.put('patientId', fhirPath.extractValue(Patient.get(0), 'Patient.identifier[0].value'))"
         ]
       }
     ],

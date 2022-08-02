@@ -76,7 +76,7 @@
   },
   "searchBar": {
     "visible": true,
-    "display": "Search name or ID",
+    "display": "Search by Family Name or ID",
     "computedRules": [
       "familyName"
     ]
@@ -112,7 +112,7 @@
               },
               {
                 "viewType": "COMPOUND_TEXT",
-                "primaryText": "ID @{familyId}",
+                "primaryText": "ID: @{familyId}",
                 "primaryTextColor": "#5A5A5A"
               }
             ],
@@ -123,25 +123,8 @@
               "text": "1",
               "status": "OVERDUE",
               "smallSized": false
-            },
-            "actions": [
-              {
-                "trigger": "ON_CLICK",
-                "workflow": "LAUNCH_REGISTER",
-              "data":{
-                "id": "<group-id>"
-              },
-                "id": "patient_profile"
-              }
-            ],
-            "availableSerives": [
-            {
-              "id": "patient_profile"
-
             }
-
-          ]
-
+          }
         ]
       }
     ]
