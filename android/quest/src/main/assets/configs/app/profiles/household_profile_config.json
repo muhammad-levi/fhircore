@@ -88,8 +88,8 @@
             "id": "82953",
             "title": "Add family member",
             "saveButtonText": "ADD MEMBER",
-            "setPractitionerDetails": false,
-            "setOrganizationDetails": false,
+            "setPractitionerDetails": true,
+            "setOrganizationDetails": true,
             "groupIdentifier": "@{familyLogicalId}"
           }
         }

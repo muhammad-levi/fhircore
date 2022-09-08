@@ -71,7 +71,6 @@ import org.smartregister.fhircore.engine.util.extension.referenceValue
 import org.smartregister.fhircore.engine.util.extension.retainMetadata
 import org.smartregister.fhircore.engine.util.extension.setPropertySafely
 import org.smartregister.fhircore.engine.util.helper.TransformSupportServices
-import org.smartregister.model.practitioner.KeycloakUserDetails
 import timber.log.Timber
 
 @HiltViewModel
@@ -105,8 +104,8 @@ constructor(
   }
 
   private val loggedInUserDetail by lazy {
-    sharedPreferencesHelper.read<KeycloakUserDetails>(
-      key = SharedPreferenceKey.PRACTITIONER_DETAILS_USER_DETAIL.name
+    sharedPreferencesHelper.read<String>(
+      key = SharedPreferenceKey.PRACTITIONER_DETAILS_FHIR_PRACTITIONER_ID.name
     )
   }
 
@@ -135,8 +134,7 @@ constructor(
 
   fun appendOrganizationInfo(resource: Resource) {
     authenticatedOrganizationIds.let { ids ->
-      val organizationRef =
-        Reference().apply { reference = "${ResourceType.Organization.name}/${ids?.first()}" }
+      val organizationRef = Reference().apply { reference = ids?.first() }
 
       when (resource) {
         is Patient -> resource.managingOrganization = organizationRef
@@ -147,8 +145,9 @@ constructor(
   }
 
   fun appendPractitionerInfo(resource: Resource) {
-    loggedInUserDetail?.id?.let {
-      val practitionerRef = Reference().apply { reference = it }
+    loggedInUserDetail?.let {
+      val practitionerRef =
+        Reference().apply { reference = "${ResourceType.Practitioner.name}/$it" }
 
       if (resource is Patient) resource.generalPractitioner = arrayListOf(practitionerRef)
       else if (resource is Encounter)
@@ -212,6 +211,7 @@ constructor(
             if (resourceId == null)
               questionnaireResponse.subject = bundleEntry.resource.asReference()
           }
+
           if (questionnaireConfig.setPractitionerDetails) {
             appendPractitionerInfo(bundleEntry.resource)
           }

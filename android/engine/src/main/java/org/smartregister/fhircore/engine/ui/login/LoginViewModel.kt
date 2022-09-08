@@ -129,6 +129,10 @@ constructor(
       practitionerDetails.userDetail
     )
     sharedPreferences.write(
+      SharedPreferenceKey.PRACTITIONER_DETAILS_FHIR_PRACTITIONER_ID.name,
+      practitionerDetails.fhirPractitionerDetails.id
+    )
+    sharedPreferences.write(
       SharedPreferenceKey.PRACTITIONER_DETAILS_CARE_TEAM_IDS.name,
       careTeamIds
     )
