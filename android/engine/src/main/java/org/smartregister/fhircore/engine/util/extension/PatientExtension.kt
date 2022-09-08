@@ -262,3 +262,9 @@ fun Patient.extractHealthStatusFromMeta(filterTag: String): HealthStatus {
   if (filterTag.isEmpty() || tagList.isEmpty()) return HealthStatus.DEFAULT
   return tagList.map { it.toHealthStatus() }.minByOrNull { it.priority() }!!
 }
+
+/**
+ * Get the practitioner endpoint url and append the keycloak-uuid. The original String is assumed to
+ * be a keycloak-uuid.
+ */
+fun String.practitionerEndpointUrl(): String = "practitioner-details?keycloak-uuid=$this"

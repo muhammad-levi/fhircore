@@ -129,6 +129,9 @@ dependencies {
     implementation 'org.opencds.cqf.cql:evaluator.activitydefinition:1.4.2-SNAPSHOT'
     implementation 'org.opencds.cqf.cql:evaluator.plandefinition:1.4.2-SNAPSHOT'
     implementation ('org.opencds.cqf.cql:evaluator.dagger:1.4.2-SNAPSHOT'){}
+
+    implementation 'org.smartregister:fhir-common-utils:0.0.2-SNAPSHOT'
+
     api('org.smartregister:workflow:0.1.0-alpha01-preview6-SNAPSHOT') {
         transitive = true
         exclude group: 'xerces'

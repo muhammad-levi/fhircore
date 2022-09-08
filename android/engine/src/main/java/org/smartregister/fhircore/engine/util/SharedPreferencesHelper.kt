@@ -18,6 +18,7 @@ package org.smartregister.fhircore.engine.util
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,7 +26,9 @@ import org.smartregister.fhircore.engine.util.extension.decodeJson
 import org.smartregister.fhircore.engine.util.extension.decodeResourceFromString
 
 @Singleton
-class SharedPreferencesHelper @Inject constructor(@ApplicationContext val context: Context) {
+class SharedPreferencesHelper
+@Inject
+constructor(@ApplicationContext val context: Context, val gson: Gson) {
 
   private var prefs: SharedPreferences =
     context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -63,6 +66,29 @@ class SharedPreferencesHelper @Inject constructor(@ApplicationContext val contex
       commit()
     }
   }
+
+  /** Write any object by saving it as JSON */
+  fun write(key: String, value: Any?) {
+    with(prefs.edit()) {
+      putString(key, gson.toJson(value))
+      commit()
+    }
+  }
+
+  /** Read any JSON object with type T */
+  inline fun <reified T> read(
+    key: String,
+    isFhirResource: Boolean = false,
+    isSerialized: Boolean = false
+  ): T? =
+    if (isFhirResource) {
+      this.read(key, null)?.decodeResourceFromString()
+    } else if (isSerialized) {
+      this.read(key, null)?.decodeJson<T>()
+    } else {
+      val json = this.read(key, null)
+      gson.fromJson(json, T::class.java)
+    }
 
   fun remove(key: String) {
     prefs.edit().remove(key).apply()

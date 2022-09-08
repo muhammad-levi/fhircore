@@ -40,6 +40,7 @@ import okhttp3.ResponseBody
 import org.smartregister.fhircore.engine.R
 import org.smartregister.fhircore.engine.configuration.app.ConfigService
 import org.smartregister.fhircore.engine.data.remote.auth.OAuthService
+import org.smartregister.fhircore.engine.data.remote.fhir.resource.FhirResourceService
 import org.smartregister.fhircore.engine.data.remote.model.response.OAuthResponse
 import org.smartregister.fhircore.engine.ui.appsetting.AppSettingActivity
 import org.smartregister.fhircore.engine.ui.login.LoginActivity
@@ -47,6 +48,7 @@ import org.smartregister.fhircore.engine.util.DispatcherProvider
 import org.smartregister.fhircore.engine.util.IS_LOGGED_IN
 import org.smartregister.fhircore.engine.util.SecureSharedPreference
 import org.smartregister.fhircore.engine.util.SharedPreferencesHelper
+import org.smartregister.fhircore.engine.util.extension.practitionerEndpointUrl
 import org.smartregister.fhircore.engine.util.extension.showToast
 import org.smartregister.fhircore.engine.util.toSha1
 import retrofit2.Call
@@ -64,6 +66,7 @@ constructor(
   val secureSharedPreference: SecureSharedPreference,
   val tokenManagerService: TokenManagerService,
   val sharedPreference: SharedPreferencesHelper,
+  val fhirResourceService: FhirResourceService,
   val dispatcherProvider: DispatcherProvider
 ) : AbstractAccountAuthenticator(context) {
 
@@ -175,6 +178,10 @@ constructor(
   }
 
   fun getUserInfo(): Call<ResponseBody> = oAuthService.userInfo()
+
+  suspend fun getPractitionerDetails(keycloakUuid: String): org.hl7.fhir.r4.model.Bundle {
+    return fhirResourceService.getResource(url = keycloakUuid.practitionerEndpointUrl())
+  }
 
   fun refreshToken(refreshToken: String): OAuthResponse? {
     val data = buildOAuthPayload(REFRESH_TOKEN)

@@ -25,6 +25,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.fhir.FhirEngine
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.IOException
 import java.net.UnknownHostException
@@ -44,11 +45,13 @@ import org.smartregister.fhircore.engine.data.remote.shared.ResponseCallback
 import org.smartregister.fhircore.engine.data.remote.shared.ResponseHandler
 import org.smartregister.fhircore.engine.util.DispatcherProvider
 import org.smartregister.fhircore.engine.util.LOGGED_IN_PRACTITIONER
+import org.smartregister.fhircore.engine.util.SharedPreferenceKey
 import org.smartregister.fhircore.engine.util.SharedPreferencesHelper
 import org.smartregister.fhircore.engine.util.USER_INFO_SHARED_PREFERENCE_KEY
 import org.smartregister.fhircore.engine.util.extension.decodeJson
 import org.smartregister.fhircore.engine.util.extension.encodeJson
 import org.smartregister.fhircore.engine.util.extension.encodeResourceToString
+import org.smartregister.model.practitioner.PractitionerDetails
 import retrofit2.Call
 import retrofit2.Response
 import timber.log.Timber
@@ -57,6 +60,7 @@ import timber.log.Timber
 class LoginViewModel
 @Inject
 constructor(
+  val fhirEngine: FhirEngine,
   val accountAuthenticator: AccountAuthenticator,
   val dispatcher: DispatcherProvider,
   val sharedPreferences: SharedPreferencesHelper,
@@ -171,7 +175,7 @@ constructor(
   val loginViewConfiguration: LiveData<LoginViewConfiguration>
     get() = _loginViewConfiguration
 
-  fun fetchLoggedInPractitioner(userInfo: UserInfo) {
+  fun fetchLoggedInPractitionerOld(userInfo: UserInfo) {
     if (!userInfo.keycloakUuid.isNullOrEmpty() &&
         sharedPreferences.read(LOGGED_IN_PRACTITIONER, null) == null
     ) {
@@ -200,6 +204,67 @@ constructor(
       _showProgressBar.postValue(false)
       _navigateToHome.postValue(true)
     }
+  }
+
+  fun fetchLoggedInPractitioner(userInfo: UserInfo) {
+    if (!userInfo.keycloakUuid.isNullOrEmpty() &&
+        sharedPreferences.read(LOGGED_IN_PRACTITIONER, null) == null
+    ) {
+      viewModelScope.launch(dispatcher.io()) {
+        kotlin
+          .runCatching {
+            val bundle =
+              accountAuthenticator.getPractitionerDetails(keycloakUuid = userInfo.keycloakUuid!!)
+            savePractitionerDetails(bundle)
+          }
+          .onSuccess {
+            _showProgressBar.postValue(false)
+            _navigateToHome.postValue(true)
+          }
+          .onFailure { throwable ->
+            Timber.e("Error fetching practitioner details", throwable)
+            handleErrorMessage(throwable)
+            _showProgressBar.postValue(false)
+          }
+      }
+    } else {
+      _showProgressBar.postValue(false)
+      _navigateToHome.postValue(true)
+    }
+  }
+
+  suspend fun savePractitionerDetails(bundle: org.hl7.fhir.r4.model.Bundle) {
+    if (!bundle.hasEntry()) return
+
+    val practitionerDetails = bundle.entry.first().resource as PractitionerDetails
+
+    val careTeams = practitionerDetails.fhirPractitionerDetails.careTeams ?: listOf()
+    val organizations = practitionerDetails.fhirPractitionerDetails.organizations ?: listOf()
+    val locations = practitionerDetails.fhirPractitionerDetails.locations ?: listOf()
+    val locationHierarchies =
+      practitionerDetails.fhirPractitionerDetails.locationHierarchyList ?: listOf()
+
+    val careTeamIds = fhirEngine.create(*careTeams.toTypedArray())
+    val organizationIds = fhirEngine.create(*organizations.toTypedArray())
+    val locationIds = fhirEngine.create(*locations.toTypedArray())
+
+    sharedPreferences.write(
+      SharedPreferenceKey.PRACTITIONER_DETAILS_USER_DETAIL.name,
+      practitionerDetails.userDetail
+    )
+    sharedPreferences.write(
+      SharedPreferenceKey.PRACTITIONER_DETAILS_CARE_TEAM_IDS.name,
+      careTeamIds
+    )
+    sharedPreferences.write(
+      SharedPreferenceKey.PRACTITIONER_DETAILS_ORGANIZATION_IDS.name,
+      organizationIds
+    )
+    sharedPreferences.write(SharedPreferenceKey.PRACTITIONER_DETAILS_LOCATION_IDS.name, locationIds)
+    sharedPreferences.write(
+      SharedPreferenceKey.PRACTITIONER_DETAILS_LOCATION_HIERARCHIES.name,
+      locationHierarchies
+    )
   }
 
   fun attemptLocalLogin(): Boolean {
