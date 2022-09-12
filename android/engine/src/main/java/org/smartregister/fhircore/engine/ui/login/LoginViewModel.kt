@@ -83,7 +83,7 @@ constructor(
           response.body()?.let {
             with(it.string().decodeJson<UserInfo>()) {
               sharedPreferences.write(USER_INFO_SHARED_PREFERENCE_KEY, this.encodeJson())
-              fetchLoggedInPractitioner(this)
+              fetchLoggedInPractitionerOld(this)
             }
           }
         } else {
