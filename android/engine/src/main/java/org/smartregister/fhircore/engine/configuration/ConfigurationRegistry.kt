@@ -251,6 +251,7 @@ constructor(
     const val DEBUG_SUFFIX = "debug"
     const val ORGANIZATION = "organization"
     const val PUBLISHER = "publisher"
+    const val LOCATION = "location"
     const val ID = "_id"
     const val COUNT = "count"
     const val DEFAULT_COUNT = "100"

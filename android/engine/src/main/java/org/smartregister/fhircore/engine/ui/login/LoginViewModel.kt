@@ -248,6 +248,8 @@ constructor(
     val organizationIds = fhirEngine.create(*organizations.toTypedArray())
     val locationIds = fhirEngine.create(*locations.toTypedArray())
 
+    Timber.i("saving practitioner details " + practitionerDetails.userDetail)
+
     sharedPreferences.write(
       SharedPreferenceKey.PRACTITIONER_DETAILS_USER_DETAIL.name,
       practitionerDetails.userDetail

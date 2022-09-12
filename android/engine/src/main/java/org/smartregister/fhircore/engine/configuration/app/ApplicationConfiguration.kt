@@ -17,12 +17,18 @@
 package org.smartregister.fhircore.engine.configuration.app
 
 import kotlinx.serialization.Serializable
+import org.hl7.fhir.r4.model.Coding
+import org.smartregister.fhircore.engine.configuration.ConfigType
 import org.smartregister.fhircore.engine.configuration.Configuration
 import org.smartregister.fhircore.engine.configuration.ConfigurationRegistry
+import org.smartregister.fhircore.engine.sync.SyncStrategy
+import org.smartregister.fhircore.engine.util.SharedPreferencesHelper
+import org.smartregister.model.practitioner.KeycloakUserDetails
 
 @Serializable
 data class ApplicationConfiguration(
-  override val appId: String = "",
+  override var appId: String,
+  override var configType: String = ConfigType.Application.name,
   override val classification: String,
   var theme: String = "",
   var languages: List<String> = listOf("en"),
@@ -31,8 +37,33 @@ data class ApplicationConfiguration(
   var applicationName: String = "",
   var appLogoIconResourceFile: String = "ic_default_logo",
   var patientTypeFilterTagViaMetaCodingSystem: String = "",
-  var count: String = ConfigurationRegistry.DEFAULT_COUNT
-) : Configuration
+  var count: String = ConfigurationRegistry.DEFAULT_COUNT,
+  val syncStrategy: List<String> = listOf(),
+) : Configuration {
+
+  fun getMandatoryTags(sharedPreferencesHelper: SharedPreferencesHelper): List<Coding> {
+    val tags = mutableListOf<Coding>()
+    syncStrategy.forEach { strategy ->
+      when (strategy) {
+        SyncStrategy.CARETEAM.value,
+        SyncStrategy.ORGANIZATION.value,
+        SyncStrategy.LOCATION.value -> {
+          sharedPreferencesHelper.read<List<String>>(strategy)?.forEach { id ->
+            tags.add(SyncStrategy.valueOf(strategy.uppercase()).tag.apply { code = id }.copy())
+          }
+        }
+        SyncStrategy.PRACTITIONER.value -> {
+          sharedPreferencesHelper.read<KeycloakUserDetails>(strategy)?.let { practitioner ->
+            tags.add(
+              SyncStrategy.valueOf(strategy.uppercase()).tag.apply { code = practitioner.id }
+            )
+          }
+        }
+      }
+    }
+    return tags
+  }
+}
 
 /**
  * A function providing a DSL for configuring [ApplicationConfiguration] used in a FHIR application
@@ -57,7 +88,8 @@ fun applicationConfigurationOf(
   applicationName: String = "",
   appLogoIconResourceFile: String = "",
   patientTypeFilterTagViaMetaCodingSystem: String = "",
-  count: String = ConfigurationRegistry.DEFAULT_COUNT
+  count: String = ConfigurationRegistry.DEFAULT_COUNT,
+  syncStrategy: List<String> = listOf(),
 ): ApplicationConfiguration =
   ApplicationConfiguration(
     appId = appId,
@@ -69,5 +101,6 @@ fun applicationConfigurationOf(
     applicationName = applicationName,
     appLogoIconResourceFile = appLogoIconResourceFile,
     patientTypeFilterTagViaMetaCodingSystem = patientTypeFilterTagViaMetaCodingSystem,
-    count = count
+    count = count,
+    syncStrategy = syncStrategy
   )

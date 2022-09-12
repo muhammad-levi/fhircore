@@ -61,7 +61,8 @@ class SyncBroadcaster(
                     configurationRegistry,
                     sharedPreferencesHelper
                       .read(USER_INFO_SHARED_PREFERENCE_KEY, null)
-                      ?.decodeJson<UserInfo>()
+                      ?.decodeJson<UserInfo>(),
+                    sharedPreferencesHelper
                   )
                   .toMap()
             ),

@@ -25,8 +25,18 @@ package org.smartregister.fhircore.engine.configuration
  * @property appId Unique identifier for the application to which this configurations is applied
  * @property classification Used to categorize multiple configurations of the same type. E.g. two
  * RegisterViewConfigurations used in an application with two registers.
+ * @property resourceType Optional FHIR resource type
  */
 interface Configuration {
   val appId: String
   val classification: String
+  val configType: String
+    get() = classification
+  val resourceType: String?
+    get() = null
 }
+// abstract class Configuration {
+//  open lateinit var appId: String
+//  open lateinit var configType: String
+//  open val resourceType: String? = null
+// }
