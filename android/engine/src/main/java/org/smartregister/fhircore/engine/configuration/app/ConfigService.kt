@@ -36,6 +36,7 @@ import org.smartregister.fhircore.engine.configuration.ConfigurationRegistry
 import org.smartregister.fhircore.engine.configuration.FhirConfiguration
 import org.smartregister.fhircore.engine.data.remote.model.response.UserInfo
 import org.smartregister.fhircore.engine.sync.SyncBroadcaster
+import org.smartregister.fhircore.engine.sync.SyncStrategy
 import org.smartregister.fhircore.engine.task.FhirTaskPlanWorker
 import org.smartregister.fhircore.engine.util.SharedPreferencesHelper
 import timber.log.Timber
@@ -112,13 +113,12 @@ interface ConfigService {
           ConfigurationRegistry.PUBLISHER -> authenticatedUserInfo?.questionnairePublisher
           ConfigurationRegistry.ID -> paramExpression
           ConfigurationRegistry.COUNT -> appConfig.count
-          ConfigurationRegistry.LOCATION -> ""
-          //            mandatoryTags
-          //              .firstOrNull {
-          //                it.display.contentEquals(SyncStrategy.LOCATION.tag.display, ignoreCase =
-          // true)
-          //              }
-          //              ?.code
+          ConfigurationRegistry.LOCATION ->
+            mandatoryTags
+              .firstOrNull {
+                it.display.contentEquals(SyncStrategy.LOCATION.tag.display, ignoreCase = true)
+              }
+              ?.code
           else -> null
         }?.let {
           // replace the evaluated value into expression for complex expressions
