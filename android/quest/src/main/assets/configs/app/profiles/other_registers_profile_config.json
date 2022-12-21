@@ -408,7 +408,16 @@
 						"planDefinitions": [
 							"a881d53a-590c-4d52-ae0f-c87b7ff04148"
 						]
-					}
+					},
+					"params": [
+						{
+							"paramType": "PREPOPULATE",
+							"linkId": "e152df80-7f89-11ed-a1eb-0242ac120002",
+							"dataType": "STRING",
+							"key": "fpConditionId",
+							"value": "@{patientId}"
+						}
+					]
 				}
 			]
 		},

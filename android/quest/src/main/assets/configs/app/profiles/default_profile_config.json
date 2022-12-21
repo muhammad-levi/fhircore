@@ -154,6 +154,13 @@
 			"actions": [
 				"data.put('isChildOver2months', fhirPath.extractValue(Patient, \"Patient.active and ((Patient.birthDate <= today() - 2 'months') and (Patient.birthDate >= today() - 5 'years'))\"))"
 			]
+		},
+		{
+			"name": "fpConditionId",
+			"condition": "true",
+			"actions": [
+				"data.put('fpConditionId', \"0444af45-c8c4-43f7-a8d3-c0c3b562b21b\")"
+			]
 		}
 	],
 	"views": [
@@ -403,7 +410,16 @@
 						"planDefinitions": [
 							"a881d53a-590c-4d52-ae0f-c87b7ff04148"
 						]
-					}
+					},
+					"params": [
+						{
+							"paramType": "PREPOPULATE",
+							"linkId": "e152df80-7f89-11ed-a1eb-0242ac120002",
+							"dataType": "STRING",
+							"key": "fpConditionId",
+							"value": "@{fpConditionId}"
+						}
+					]
 				}
 			]
 		},
