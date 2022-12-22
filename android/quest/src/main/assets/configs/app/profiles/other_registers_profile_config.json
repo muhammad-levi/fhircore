@@ -17,7 +17,13 @@
 					},
 					{
 						"resource": "Task",
-						"searchParameter": "subject"
+						"searchParameter": "subject",
+						"sortConfigs": [
+							{
+								"paramName": "period",
+								"dataType": "DATE"
+							}
+						]
 					}
 				]
 			}
@@ -156,6 +162,13 @@
 			"actions": [
 				"data.put('canHavePregnancyOutcome', data.get('canBearChild'))"
 			]
+		},
+		{
+			"name": "fpConditionId",
+			"condition": "true",
+			"actions": [
+				"data.put('fpConditionId', service.filterList(Condition, 'Condition.code.text=\"Family Planning\"')[0].idElement.idPart)"
+			]
 		}
 	],
 	"views": [
@@ -266,10 +279,32 @@
 										]
 									},
 									{
+										"name": "taskExecutionStartDate",
+										"condition": "true",
+										"actions": [
+											"data.put('taskExecutionStartDate', fhirPath.extractValue(Task, 'Task.executionPeriod.start'))"
+										]
+									},
+									{
+										"name": "taskPeriodDueDate",
+										"condition": "true",
+										"actions": [
+											"data.put('taskPeriodDueDate', service.formatDate(data.get('taskExecutionStartDate'), \"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\", \"dd-MM-yyyy\"))"
+										]
+									},
+									{
 										"name": "taskDescription",
 										"condition": "true",
 										"actions": [
 											"data.put('taskDescription', fhirPath.extractValue(Task, 'Task.description'))"
+										]
+									},
+									{
+										"name": "taskDescriptionWithStartDate",
+										"condition": "true",
+										"priority": 2,
+										"actions": [
+											"data.put('taskDescriptionWithStartDate', data.get('taskDescription') + ' ' + 'due' + ' ' + data.get('taskPeriodDueDate'))"
 										]
 									},
 									{
@@ -298,7 +333,7 @@
 									{
 										"viewType": "BUTTON",
 										"smallSized": "true",
-										"text": "@{taskDescription}",
+										"text": "@{taskDescriptionWithStartDate}",
 										"status": "@{taskStatusColorCode}",
 										"visible": "true",
 										"enabled": "@{patientActive}",
@@ -415,7 +450,7 @@
 							"linkId": "e152df80-7f89-11ed-a1eb-0242ac120002",
 							"dataType": "STRING",
 							"key": "fpConditionId",
-							"value": "@{patientId}"
+							"value": "@{fpConditionId}"
 						}
 					]
 				}
