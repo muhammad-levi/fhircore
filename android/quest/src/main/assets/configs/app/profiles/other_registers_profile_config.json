@@ -167,7 +167,7 @@
 			"name": "fpConditionId",
 			"condition": "true",
 			"actions": [
-				"data.put('fpConditionId', service.filterList(Condition, 'Condition.code.text=\"Family Planning\"')[0].idElement.idPart)"
+				"data.put('fpConditionId', service.filterList(Condition, 'Condition.code.coding.code=\"99998888\"')[0].idElement.idPart)"
 			]
 		}
 	],
