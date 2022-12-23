@@ -350,7 +350,16 @@
 													"planDefinitions": [
 														"9fac39bd-9750-4c1d-b355-1961de4e37f3"
 													]
-												}
+												},
+												"params": [
+													{
+														"paramType": "PREPOPULATE",
+														"linkId": "772e0f8a-829a-11ed-a1eb-0242ac120002",
+														"dataType": "STRING",
+														"key": "fpConditionId",
+														"value": "@{fpConditionId}"
+													}
+												]
 											}
 										]
 									}

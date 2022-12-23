@@ -345,7 +345,16 @@
                           "saveButtonText": "Save",
                           "taskId": "@{taskId}",
                           "resourceIdentifier": "@{taskFor}"
-                        }
+                        },
+                        "params": [
+                          {
+                            "paramType": "PREPOPULATE",
+                            "linkId": "772e0f8a-829a-11ed-a1eb-0242ac120002",
+                            "dataType": "STRING",
+                            "key": "fpConditionId",
+                            "value": "@{fpConditionId}"
+                          }
+                        ]
                       }
                     ]
                   }
