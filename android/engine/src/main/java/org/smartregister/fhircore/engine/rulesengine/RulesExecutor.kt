@@ -36,25 +36,24 @@ import org.smartregister.fhircore.engine.util.extension.extractLogicalIdUuid
 class RulesExecutor @Inject constructor(val rulesFactory: RulesFactory) {
 
   suspend fun processResourceData(
-    baseResource: Resource,
-    relatedRepositoryResourceData: LinkedList<RepositoryResourceData>,
-    ruleConfigs: List<RuleConfig>,
-    ruleConfigsKey: String,
-    params: Map<String, String>?
+      baseResource: Resource,
+      relatedRepositoryResourceData: LinkedList<RepositoryResourceData>,
+      ruleConfigs: List<RuleConfig>,
+      ruleConfigsKey: String,
+      params: Map<String, String>?
   ): ResourceData {
     val relatedResourcesMap = relatedRepositoryResourceData.createRelatedResourcesMap()
     val computedValuesMap =
-      computeRules(
-        ruleConfigs = ruleConfigs,
-        ruleConfigsKey = ruleConfigsKey,
-        baseResource = baseResource,
-        relatedResourcesMap = relatedResourcesMap
-      )
+        computeRules(
+            ruleConfigs = ruleConfigs,
+            ruleConfigsKey = ruleConfigsKey,
+            baseResource = baseResource,
+            relatedResourcesMap = relatedResourcesMap)
     return ResourceData(
-      baseResourceId = baseResource.logicalId.extractLogicalIdUuid(),
-      baseResourceType = baseResource.resourceType,
-      computedValuesMap = computedValuesMap.toMutableMap().plus(params!!).toMap()
-    )
+        baseResourceId = baseResource.logicalId.extractLogicalIdUuid(),
+        baseResourceType = baseResource.resourceType,
+        computedValuesMap = computedValuesMap.toMutableMap().plus(params!!).toMap(),
+      emptyMap())
   }
 
   /**
@@ -62,72 +61,68 @@ class RulesExecutor @Inject constructor(val rulesFactory: RulesFactory) {
    * views. The LIST view computed values includes the parent's.
    */
   suspend fun processListResourceData(
-    listProperties: ListProperties,
-    relatedRepositoryResourceData: LinkedList<RepositoryResourceData>,
-    computedValuesMap: Map<String, Any>,
+      listProperties: ListProperties,
+      relatedRepositoryResourceData: LinkedList<RepositoryResourceData>,
+      computedValuesMap: Map<String, Any>,
   ): List<ResourceData> {
     val relatedResourcesMap = relatedRepositoryResourceData.createRelatedResourcesMap()
     return listProperties.resources.flatMap { listResource ->
       filteredListResources(relatedResourcesMap, listResource)
-        .mapToResourceData(
-          relatedResourcesMap = relatedResourcesMap,
-          ruleConfigs = listProperties.registerCard.rules,
-          ruleConfigsKey = listProperties.registerCard::class.java.canonicalName,
-          listRelatedResources = listResource.relatedResources,
-          computedValuesMap = computedValuesMap
-        )
+          .mapToResourceData(
+              relatedResourcesMap = relatedResourcesMap,
+              ruleConfigs = listProperties.registerCard.rules,
+              ruleConfigsKey = listProperties.registerCard::class.java.canonicalName,
+              listRelatedResources = listResource.relatedResources,
+              computedValuesMap = computedValuesMap)
     }
   }
 
   private suspend fun computeRules(
-    ruleConfigs: List<RuleConfig>,
-    ruleConfigsKey: String,
-    baseResource: Resource,
-    relatedResourcesMap: Map<String, List<Resource>>
+      ruleConfigs: List<RuleConfig>,
+      ruleConfigsKey: String,
+      baseResource: Resource,
+      relatedResourcesMap: Map<String, List<Resource>>
   ): Map<String, Any> =
-    // Compute values via rules engine and return a map. Rule names MUST be unique
-    rulesFactory.fireRules(
-      rules = rulesFactory.generateRules(ruleConfigsKey, ruleConfigs),
-      baseResource = baseResource,
-      relatedResourcesMap = relatedResourcesMap
-    )
+      // Compute values via rules engine and return a map. Rule names MUST be unique
+      rulesFactory.fireRules(
+          rules = rulesFactory.generateRules(ruleConfigsKey, ruleConfigs),
+          baseResource = baseResource,
+          relatedResourcesMap = relatedResourcesMap)
 
   private suspend fun List<Resource>.mapToResourceData(
-    relatedResourcesMap: MutableMap<String, MutableList<Resource>>,
-    ruleConfigs: List<RuleConfig>,
-    ruleConfigsKey: String,
-    listRelatedResources: List<ExtractedResource>,
-    computedValuesMap: Map<String, Any>
+      relatedResourcesMap: MutableMap<String, MutableList<Resource>>,
+      ruleConfigs: List<RuleConfig>,
+      ruleConfigsKey: String,
+      listRelatedResources: List<ExtractedResource>,
+      computedValuesMap: Map<String, Any>
   ) =
-    this.map { resource ->
-      val start = System.currentTimeMillis()
-      val listItemRelatedResources: Map<String, List<Resource>> =
-        listRelatedResources.associate { (id, resourceType, fhirPathExpression) ->
-          (id
-            ?: resourceType.name) to
-            rulesFactory.rulesEngineService.retrieveRelatedResources(
-              resource = resource,
-              relatedResourceKey = id ?: resourceType.name,
-              referenceFhirPathExpression = fhirPathExpression,
-              relatedResourcesMap = relatedResourcesMap
-            )
-        }
+      this.map { resource ->
+        val start = System.currentTimeMillis()
+        val listItemRelatedResources: Map<String, List<Resource>> =
+            listRelatedResources.associate { (id, resourceType, fhirPathExpression) ->
+              (id
+                  ?: resourceType.name) to
+                  rulesFactory.rulesEngineService.retrieveRelatedResources(
+                      resource = resource,
+                      relatedResourceKey = id ?: resourceType.name,
+                      referenceFhirPathExpression = fhirPathExpression,
+                      relatedResourcesMap = relatedResourcesMap)
+            }
 
-      val listComputedValuesMap =
-        computeRules(
-          ruleConfigs = ruleConfigs,
-          ruleConfigsKey = ruleConfigsKey,
-          baseResource = resource,
-          relatedResourcesMap = listItemRelatedResources
-        )
+        val listComputedValuesMap =
+            computeRules(
+                ruleConfigs = ruleConfigs,
+                ruleConfigsKey = ruleConfigsKey,
+                baseResource = resource,
+                relatedResourcesMap = listItemRelatedResources)
 
-      // LIST view should reuse the previously computed values
-      ResourceData(
-        baseResourceId = resource.logicalId.extractLogicalIdUuid(),
-        baseResourceType = resource.resourceType,
-        computedValuesMap = computedValuesMap.plus(listComputedValuesMap)
-      )
-    }
+        // LIST view should reuse the previously computed values
+        ResourceData(
+            baseResourceId = resource.logicalId.extractLogicalIdUuid(),
+            baseResourceType = resource.resourceType,
+            computedValuesMap = computedValuesMap.plus(listComputedValuesMap),
+            listResourceDataMap = computedValuesMap as Map<String, List<ResourceData>>)
+      }
 
   /**
    * This function returns a list of filtered resources. The required list is obtained from
@@ -135,23 +130,20 @@ class RulesExecutor @Inject constructor(val rulesFactory: RulesFactory) {
    * extraction of the [ListResource] conditional FHIR path expression
    */
   private fun filteredListResources(
-    relatedResourceMap: MutableMap<String, MutableList<Resource>>,
-    listResource: ListResource
+      relatedResourceMap: MutableMap<String, MutableList<Resource>>,
+      listResource: ListResource
   ): MutableList<Resource> {
     val relatedResourceKey = listResource.relatedResourceId ?: listResource.resourceType.name
     val newListRelatedResources = relatedResourceMap[relatedResourceKey]
 
     // conditionalFhirPath expression e.g. "Task.status == 'ready'" to filter tasks that are due
     if (newListRelatedResources != null &&
-        !listResource.conditionalFhirPathExpression.isNullOrEmpty()
-    ) {
-      return rulesFactory
-        .rulesEngineService
-        .filterResources(
-          resources = newListRelatedResources,
-          fhirPathExpression = listResource.conditionalFhirPathExpression
-        )
-        .toMutableList()
+        !listResource.conditionalFhirPathExpression.isNullOrEmpty()) {
+      return rulesFactory.rulesEngineService
+          .filterResources(
+              resources = newListRelatedResources,
+              fhirPathExpression = listResource.conditionalFhirPathExpression)
+          .toMutableList()
     }
 
     return newListRelatedResources ?: mutableListOf()
@@ -177,15 +169,15 @@ class RulesExecutor @Inject constructor(val rulesFactory: RulesFactory) {
  * s in the map.
  */
 fun LinkedList<RepositoryResourceData>.createRelatedResourcesMap():
-  MutableMap<String, MutableList<Resource>> {
+    MutableMap<String, MutableList<Resource>> {
   val relatedResourcesMap = mutableMapOf<String, MutableList<Resource>>()
   while (this.isNotEmpty()) {
     val relatedResourceData = this.removeFirst()
     relatedResourcesMap
-      .getOrPut(relatedResourceData.configId ?: relatedResourceData.resource.resourceType.name) {
-        mutableListOf()
-      }
-      .add(relatedResourceData.resource)
+        .getOrPut(relatedResourceData.configId ?: relatedResourceData.resource.resourceType.name) {
+          mutableListOf()
+        }
+        .add(relatedResourceData.resource)
     relatedResourceData.relatedResources.forEach { this.addLast(it) }
   }
   return relatedResourcesMap
@@ -208,7 +200,7 @@ fun List<ViewProperties>.retrieveListProperties(): List<ListProperties> {
       ViewType.ROW -> viewPropertiesLinkedList.addAll((properties as RowProperties).children)
       ViewType.CARD -> viewPropertiesLinkedList.addAll((properties as CardViewProperties).content)
       ViewType.LIST ->
-        viewPropertiesLinkedList.addAll((properties as ListProperties).registerCard.views)
+          viewPropertiesLinkedList.addAll((properties as ListProperties).registerCard.views)
       else -> {}
     }
   }
