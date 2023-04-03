@@ -111,7 +111,8 @@ fun AppDrawer(
         MenuActionButton(
           modifier = modifier,
           navigationConfiguration = appUiState.navigationConfiguration,
-          navController = navController
+          navController = navController,
+          openDrawer = openDrawer
         )
 
         Divider(color = DividerColor)
@@ -311,7 +312,8 @@ private fun StaticMenus(
 private fun MenuActionButton(
   modifier: Modifier = Modifier,
   navigationConfiguration: NavigationConfiguration,
-  navController: NavController
+  navController: NavController,
+  openDrawer: (Boolean) -> Unit
 ) {
   if (navigationConfiguration.menuActionButton != null &&
       navigationConfiguration.menuActionButton?.visible == true
@@ -321,6 +323,7 @@ private fun MenuActionButton(
         modifier
           .fillMaxWidth()
           .clickable {
+            openDrawer(false)
             navigationConfiguration.menuActionButton?.actions?.handleClickEvent(navController)
           }
           .padding(16.dp)
