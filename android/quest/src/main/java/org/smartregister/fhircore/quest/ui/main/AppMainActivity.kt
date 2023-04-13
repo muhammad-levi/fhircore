@@ -126,9 +126,21 @@ open class AppMainActivity : BaseMultiLanguageActivity(), QuestionnaireHandler, 
     super.onResume()
     syncListenerManager.registerSyncListener(this, lifecycle)
 
+    // TODO Delete code after SDK fix is merged
     appMainViewModel.viewModelScope.launch(dispatcherProvider.io()) {
       fhirEngine.addDateTimeIndex()
     }
+
+    // TODO To be deleted
+    /*object : CountDownTimer(5000, 1000) {
+      override fun onTick(timer: Long) {
+        Timber.e(timer.toString())
+      }
+      override fun onFinish() {
+        throw NullPointerException()
+      }
+    }
+    .start()*/
   }
 
   override fun onSubmitQuestionnaire(activityResult: ActivityResult) {
