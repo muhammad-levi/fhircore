@@ -331,8 +331,14 @@ dependencies {
 
     androidTestImplementation deps.mockk_android
     androidTestImplementation "androidx.test:core-ktx:$versions.atsl_core"
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation 'info.cukes:cucumber-android:1.2.5'
+    androidTestImplementation 'info.cukes:cucumber-picocontainer:1.2.5'
 
-   // debugImplementation because LeakCanary should only run in debug builds.
+    annotationProcessor 'com.google.dagger:hilt-android-compiler:2.30.1-alpha'
+
+    // debugImplementation because LeakCanary should only run in debug builds.
    // debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.10'
 
     testImplementation 'info.cqframework:cql-to-elm:2.4.0'
