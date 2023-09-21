@@ -28,11 +28,7 @@ class ResponseLoggingInterceptor : Interceptor {
     val body = response.body
     if (body != null) {
       val contentEncoding = response.header(CONTENT_ENCODING)
-      if (GZIP == contentEncoding) {
-        Timber.e("GZIP enabled")
-      } else {
-        Timber.e("GZIP disabled")
-      }
+      Timber.e("Content-Encoding $contentEncoding")
     }
     return response
   }
