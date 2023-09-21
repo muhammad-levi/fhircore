@@ -41,6 +41,7 @@ import org.smartregister.fhircore.engine.data.remote.auth.KeycloakService
 import org.smartregister.fhircore.engine.data.remote.auth.OAuthService
 import org.smartregister.fhircore.engine.data.remote.fhir.resource.FhirConverterFactory
 import org.smartregister.fhircore.engine.data.remote.fhir.resource.FhirResourceService
+import org.smartregister.fhircore.engine.data.remote.shared.ResponseLoggingInterceptor
 import org.smartregister.fhircore.engine.data.remote.shared.TokenAuthenticator
 import org.smartregister.fhircore.engine.util.SharedPreferencesHelper
 import org.smartregister.fhircore.engine.util.extension.getCustomJsonParser
@@ -63,6 +64,7 @@ class NetworkModule {
           redactHeader(COOKIE)
         },
       )
+      .addInterceptor(ResponseLoggingInterceptor())
       .connectTimeout(TIMEOUT_DURATION, TimeUnit.SECONDS)
       .readTimeout(TIMEOUT_DURATION, TimeUnit.SECONDS)
       .callTimeout(TIMEOUT_DURATION, TimeUnit.SECONDS)
@@ -108,6 +110,7 @@ class NetworkModule {
           redactHeader(COOKIE)
         },
       )
+      .addInterceptor(ResponseLoggingInterceptor())
       .connectTimeout(TIMEOUT_DURATION, TimeUnit.SECONDS)
       .readTimeout(TIMEOUT_DURATION, TimeUnit.SECONDS)
       .callTimeout(TIMEOUT_DURATION, TimeUnit.SECONDS)
